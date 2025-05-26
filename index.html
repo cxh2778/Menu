@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>味品 - 智能食谱与膳食计划</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui/1.13.2/themes/base/jquery-ui.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo-container">
+                <span class="material-symbols-rounded">restaurant</span>
+                <h1>味品</h1>
+            </div>
+            <div class="search-container">
+                <span class="material-symbols-rounded">search</span>
+                <input type="text" id="recipe-search" placeholder="搜索食谱或食材...">
+            </div>
+            <nav>
+                <button class="nav-btn active" data-view="recipes">食谱</button>
+                <button class="nav-btn" data-view="meal-plan">膳食计划</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- 食谱视图 -->
+            <section id="recipes-view" class="view active">
+                <div class="filter-bar">
+                    <div class="filter-chips">
+                        <span class="chip active" data-filter="all">全部</span>
+                        <span class="chip" data-filter="breakfast">早餐</span>
+                        <span class="chip" data-filter="lunch">午餐</span>
+                        <span class="chip" data-filter="dinner">晚餐</span>
+                        <span class="chip" data-filter="dessert">甜点</span>
+                    </div>
+                    <button id="add-recipe-btn" class="primary-btn">
+                        <span class="material-symbols-rounded">add</span>
+                        添加食谱
+                    </button>
+                </div>
+                
+                <div class="recipes-grid" id="recipes-container">
+                    <!-- 食谱将通过JS动态加载 -->
+                </div>
+            </section>
+
+            <!-- 膳食计划视图 -->
+            <section id="meal-plan-view" class="view">
+                <div class="meal-plan-header">
+                    <div class="date-navigator">
+                        <button id="prev-week" class="icon-btn">
+                            <span class="material-symbols-rounded">chevron_left</span>
+                        </button>
+                        <h2 id="current-week-display">2023年5月15日 - 5月21日</h2>
+                        <button id="next-week" class="icon-btn">
+                            <span class="material-symbols-rounded">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="meal-planner">
+                    <div class="time-labels">
+                        <div class="time-label">早餐</div>
+                        <div class="time-label">午餐</div>
+                        <div class="time-label">晚餐</div>
+                    </div>
+                    <div class="week-grid" id="meal-plan-grid">
+                        <!-- 膳食计划网格将通过JS动态生成 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 食谱详情模态框 -->
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-recipe-title">食谱标题</h2>
+                <button class="close-modal">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="recipe-image-container">
+                    <img id="modal-recipe-image" src="" alt="食谱图片">
+                </div>
+                <div class="recipe-details">
+                    <div class="recipe-intro" id="modal-recipe-intro"></div>
+                    
+                    <h3>
+                        <span class="material-symbols-rounded">shopping_cart</span>
+                        食材
+                    </h3>
+                    <ul id="modal-recipe-ingredients" class="ingredients-list"></ul>
+                    
+                    <h3>
+                        <span class="material-symbols-rounded">format_list_numbered</span>
+                        步骤
+                    </h3>
+                    <ol id="modal-recipe-steps" class="steps-list"></ol>
+                </div>
+                <div class="modal-actions">
+                    <button id="add-to-plan" class="primary-btn">
+                        <span class="material-symbols-rounded">calendar_today</span>
+                        添加到膳食计划
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加到膳食计划弹窗 -->
+    <div id="add-to-plan-modal" class="modal">
+        <div class="modal-content small-modal">
+            <div class="modal-header">
+                <h3>添加到膳食计划</h3>
+                <button class="close-modal">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="plan-date">日期</label>
+                    <input type="date" id="plan-date">
+                </div>
+                <div class="form-group">
+                    <label for="plan-meal">餐次</label>
+                    <select id="plan-meal">
+                        <option value="breakfast">早餐</option>
+                        <option value="lunch">午餐</option>
+                        <option value="dinner">晚餐</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button id="confirm-add-to-plan" class="primary-btn">
+                        <span class="material-symbols-rounded">check</span>
+                        确认
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加自定义食谱模态框 -->
+    <div id="add-recipe-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建新食谱</h3>
+                <button class="close-modal">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="new-recipe-form">
+                    <div class="form-group">
+                        <label for="recipe-name">食谱名称</label>
+                        <input type="text" id="recipe-name" placeholder="例如：红烧肉" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recipe-category">分类</label>
+                        <select id="recipe-category" required>
+                            <option value="breakfast">早餐</option>
+                            <option value="lunch">午餐</option>
+                            <option value="dinner">晚餐</option>
+                            <option value="dessert">甜点</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recipe-image">图片URL</label>
+                        <input type="url" id="recipe-image" placeholder="https://example.com/image.jpg" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recipe-description">简介</label>
+                        <textarea id="recipe-description" rows="3" placeholder="描述这道菜的特点、口感和特色..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>食材</label>
+                        <div id="ingredients-container">
+                            <div class="ingredient-item">
+                                <input type="text" class="ingredient-input" placeholder="食材名称及用量（例如：五花肉 500克）" required>
+                                <button type="button" class="remove-item-btn">
+                                    <span class="material-symbols-rounded">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" id="add-ingredient-btn" class="add-item-btn">
+                            <span class="material-symbols-rounded">add</span>
+                            添加食材
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>步骤</label>
+                        <div id="steps-container">
+                            <div class="step-item">
+                                <input type="text" class="step-input" placeholder="详细描述烹饪步骤" required>
+                                <button type="button" class="remove-item-btn">
+                                    <span class="material-symbols-rounded">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" id="add-step-btn" class="add-item-btn">
+                            <span class="material-symbols-rounded">add</span>
+                            添加步骤
+                        </button>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" id="save-recipe-btn" class="primary-btn">
+                            <span class="material-symbols-rounded">save</span>
+                            保存食谱
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
